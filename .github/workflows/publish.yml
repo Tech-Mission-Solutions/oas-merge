@@ -1,0 +1,41 @@
+name: Publish to GitHub Packages
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers on any tag starting with v (e.g., v1.0.2)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Permissions required to write to GitHub Packages
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.30.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.12.0'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@${{ github.repository_owner }}'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Project
+        run: pnpm build
+
+      - name: Publish to GitHub Packages
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

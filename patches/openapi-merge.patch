@@ -1,0 +1,88 @@
+diff --git a/dist/index.js b/dist/index.js
+index f568e3a6040b473ccd94c59f2a7ba75bb4a0d71f..56278f26b9df0b817ac1b75a9051fb198ad25f5a 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -5,6 +5,7 @@ const ts_is_present_1 = require("ts-is-present");
+ const data_1 = require("./data");
+ Object.defineProperty(exports, "isErrorResult", { enumerable: true, get: function () { return data_1.isErrorResult; } });
+ const tags_1 = require("./tags");
++const security_1 = require("./security");
+ const paths_and_components_1 = require("./paths-and-components");
+ const extensions_1 = require("./extensions");
+ const info_1 = require("./info");
+@@ -35,7 +36,7 @@ function merge(inputs) {
+         info: info_1.mergeInfos(inputs),
+         servers: getFirstMatching(inputs, input => input.oas.servers),
+         externalDocs: getFirstMatching(inputs, input => input.oas.externalDocs),
+-        security: getFirstMatching(inputs, input => input.oas.security),
++        security: security_1.mergeSecurity(inputs),
+         tags: tags_1.mergeTags(inputs),
+         paths,
+         components,
+diff --git a/dist/paths-and-components.js b/dist/paths-and-components.js
+index 9173e1518252cedbd9440cd897e0a8d02d77cea0..c3ced90f4bee792f096427032b3cf7dec52f5e7f 100644
+--- a/dist/paths-and-components.js
++++ b/dist/paths-and-components.js
+@@ -209,9 +209,19 @@ function mergePathsAndComponents(inputs) {
+                     referenceModification[`#/components/headers/${from}`] = `#/components/headers/${to}`;
+                 });
+             }
+-            // security schemes are different, we just take the security schemes from the first file that has any
+-            if (oas.components.securitySchemes !== undefined && Object.keys(oas.components.securitySchemes).length > 0 && result.components.securitySchemes === undefined) {
+-                result.components.securitySchemes = oas.components.securitySchemes;
++            // security schemes
++            if (oas.components.securitySchemes !== undefined) {
++                result.components.securitySchemes = result.components.securitySchemes || {};
++
++                processComponents(
++                  result.components.securitySchemes,
++                  oas.components.securitySchemes,
++                  component_equivalence_1.deepEquality(resultLookup, currentLookup),
++                  { prefix: '', mergeDispute: true, ...dispute },
++                  (from, to) => {
++                      referenceModification[`#/components/securitySchemes/${from}`] = `#/components/securitySchemes/${to}`;
++                  }
++                );
+             }
+             // links
+             if (oas.components.links !== undefined) {
+diff --git a/dist/security.d.ts b/dist/security.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..3d268a96a83d7a26a937617efe65bf79ad1cfd27
+--- /dev/null
++++ b/dist/security.d.ts
+@@ -0,0 +1,3 @@
++import { MergeInput } from './data';
++import { Swagger } from 'atlassian-openapi';
++export declare function mergeSecurity(inputs: MergeInput): Swagger.Security[] | undefined;
+\ No newline at end of file
+diff --git a/dist/security.js b/dist/security.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..3148970738b55a2744880d40f585cde70f03df03
+--- /dev/null
++++ b/dist/security.js
+@@ -0,0 +1,24 @@
++"use strict";
++Object.defineProperty(exports, "__esModule", { value: true });
++exports.mergeSecurity = void 0;
++function mergeSecurity(inputs) {
++  const result = new Array();
++  const seenSecurity = new Set();
++  inputs.forEach(input => {
++    const { security } = input.oas;
++    if (security !== undefined) {
++      const keys = security.flatMap(obj => Object.keys(obj));
++      keys.forEach((k, i) => {
++        if (!seenSecurity.has(k)) {
++          seenSecurity.add(k);
++          result.push(security[i]);
++        }
++      });
++    }
++  });
++  if (result.length === 0) {
++    return undefined;
++  }
++  return result;
++}
++exports.mergeSecurity = mergeSecurity;
