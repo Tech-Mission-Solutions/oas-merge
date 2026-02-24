@@ -1,5 +1,5 @@
 {
-  "name": "@tms/oas-merge",
+  "name": "@tech-mission-solutions/oas-merge",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
@@ -7,7 +7,7 @@
     "type": "git",
     "url": "git+https://github.com/your-username/oas-merge.git"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Selectively merge OpenAPI schemas via CLI or Config",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
