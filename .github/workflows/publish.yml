@@ -1,4 +1,4 @@
-name: Publish to GitHub Packages
+name: Publish to GitHub Packages & Release
 
 on:
   push:
@@ -10,12 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     # Permissions required to write to GitHub Packages
     permissions:
-      contents: read
-      packages: write
+      contents: write # Required for creating Releases & Changelogs
+      packages: write  # Required for publishing to GPR
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Important: Fetch all history for accurate changelogs
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -27,7 +29,7 @@ jobs:
         with:
           node-version: '24.12.0'
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@${{ github.repository_owner }}'
+          scope: '@tech-mission-solutions'
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -39,3 +41,27 @@ jobs:
         run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- NEW: GITHUB RELEASE STEP ---
+
+      - name: Zip Artifacts
+        run: zip -r dist.zip dist package.json README.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist.zip
+          generate_release_notes: true # Automatically creates the changelog
+          body: |
+            ## OAS Merge - Version ${{ github.ref_name }}
+            
+            This release contains the latest build of the `@tech-mission-solutions/oas-merge` library and CLI.
+            
+            ### Installation
+            ```bash
+            pnpm add @tech-mission-solutions/oas-merge
+            ```
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
