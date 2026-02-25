@@ -1,5 +1,5 @@
 import { parse } from "@readme/openapi-parser";
-import { isErrorResult, type MergeInput, merge } from "openapi-merge";
+import { isErrorResult, type MergeInput, merge } from "./openapi-merge";
 import type { OpenAPIV3 } from "openapi-types";
 import outmatch from "outmatch";
 import { filterOpenApi } from "@/lib/openapi-filter";
