@@ -1,5 +1,5 @@
 import { MergeInput } from './data';
-import { Swagger } from 'atlassian-openapi';
+import { Swagger } from '@atlassian/atlassian-openapi';
 
 export function mergeSecurity(inputs: MergeInput): Swagger.SecurityRequirement[] | undefined {
   const result = new Array<Swagger.SecurityRequirement>();
