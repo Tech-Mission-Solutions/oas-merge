@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/your-username/oas-merge.git"
   },
+  "engines": {
+    "node": "^24.22.2 || ^26.13.0"
+  },
   "version": "1.0.4",
   "description": "Selectively merge OpenAPI schemas via CLI or Config",
   "main": "./dist/index.js",

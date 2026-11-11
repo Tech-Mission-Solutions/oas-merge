@@ -6,3 +6,4 @@ dist
 .pnpm-debug.log
 *.tsbuildinfo
 .npmrc
+.idea
