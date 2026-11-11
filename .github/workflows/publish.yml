@@ -20,14 +20,15 @@ jobs:
           fetch-depth: 0 # Important: Fetch all history for accurate changelogs
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 10.30.1
+          version: 11.5.2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.12.0'
+          node-version-file: 'package.json'
+          check-latest: true
           registry-url: 'https://npm.pkg.github.com'
           scope: '@tech-mission-solutions'
 
